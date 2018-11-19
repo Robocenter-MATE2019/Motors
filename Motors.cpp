@@ -1,116 +1,96 @@
-// last changes 16.11.18. 23:44
+#include "Motors.h"
+#include <Arduino.h>
 
 
-#include <Servo.h>
+bool Motor::get_inverse()
+{
+	return m_is_inverse;
+}
 
-class Motor {
-public:
-	Motor();
-	virtual void init() = 0;
-	virtual void set_power(int8_t power) = 0;
-	void set_inverise(bool inverse)
-	{
-		m_is_inverse = inverse;
-	}
-	bool get_inverise()
-	{
-		return m_is_inverse;
-	}
-	int8_t get_power()
-	{
-		return m_power;
-	}
-protected:
-	int8_t m_power;
-	bool m_is_inverse;
-};
+void Motor::set_inverse(bool inverse)
+{
+	m_is_inverse = inverse;
+}
 
-class BrushlessMotor :Motor {
-public:
-	BrushlessMotor(uint8_t pin)
-	{
-		m_pin = pin;
-	}
-	void init() override
-	{
-		m_driver.attach(m_pin);
-		m_driver.writeMicroseconds(2000);
-		delay(2000);
-		m_driver.writeMicroseconds(1000);
-		delay(6000);
-	}
-	void set_power(int8_t power) override
-	{
-		power = constrain(power, -100, 100);
-		if (m_is_inverse) power *= -1;
-		power = map(power, -100, 100, 1000, 2000);
-		m_driver.writeMicroseconds(power);
-	}
-private:
-	uint8_t m_pin;
-	Servo m_driver;
-};
+int8_t Motor::get_power()
+{
+	return m_power;
+}
 
-class BrushMotor :Motor { //PWM CONTROL
-public:
-	BrushMotor(uint8_t pin_left, uint8_t pin_right)
-	{
-		m_driver_right = pin_right;
-		m_driver_left = pin_left;
-	}
-	void init() override
-	{
-		pinMode(m_driver_right, OUTPUT);
-		pinMode(m_driver_left, OUTPUT);
-	}
-	void set_power(int8_t power) override
-	{
-		power = constrain(power, -100, 100);
-		if (power > 0 || (m_is_inverse == true && power < 0))
-		{
-			power = map(abs(power), 0, 100, 0, 1023);
-			analogWrite(m_driver_left, power);
-			analogWrite(m_driver_right, 0);
-		}
-		else if (power < 0 || (m_is_inverse == false && power > 0))
-		{
-			power = map(abs(power), 0, 100, 0, 1023);
-			analogWrite(m_driver_left, 0);
-			analogWrite(m_driver_right, power);
-		}
-	}
-private:
-	uint8_t m_driver_left;
-	uint8_t m_driver_right;
-};
 
-class LevelMotor :Motor { //LEVEL CONTROL
-public:
-	LevelMotor(uint8_t pin_left, uint8_t pin_right)
+
+BrushlessMotor::BrushlessMotor(uint8_t pin)
+{ 
+	m_pin = pin;
+}
+
+void BrushlessMotor::init()
+{
+	m_driver.attach(m_pin);
+	m_driver.writeMicroseconds(1500);
+}
+
+void BrushlessMotor::set_power(int8_t power)
+{
+	m_power = constrain(power, -100, 100);
+	if (m_is_inverse) m_power *= -1;
+	m_power = map(m_power, -100, 100, 1000, 2000);
+	m_driver.writeMicroseconds(m_power);
+}
+
+
+
+BrushMotor::BrushMotor(uint8_t pin_left, uint8_t pin_right)
+{
+	m_driver_right = pin_right;
+	m_driver_left = pin_left;
+}
+
+void BrushMotor::init()
+{
+	pinMode(m_driver_right, OUTPUT);
+	pinMode(m_driver_left, OUTPUT);
+}
+void BrushMotor::set_power(int8_t power)
+{
+	m_power = constrain(power, -100, 100);
+	m_power = m_is_inverse ? m_power * -1 : m_power;
+	if (m_power > 0)
 	{
-		m_driver_right = pin_right;
-		m_driver_left = pin_left;
+		analogWrite(m_driver_left, map(abs(m_power), 0, 100, 0, 255));
+		analogWrite(m_driver_right, 0);
 	}
-	void init() override
+	else
 	{
-		pinMode(m_driver_left, OUTPUT);
-		pinMode(m_driver_right, OUTPUT);
+		analogWrite(m_driver_right, map(abs(m_power), 0, 100, 0, 255));
+		analogWrite(m_driver_left, 0);
 	}
-	void set_power(int8_t power) override
+}
+
+
+
+LevelMotor::LevelMotor(uint8_t pin_left, uint8_t pin_right)
+{
+	m_driver_right = pin_right;
+	m_driver_left = pin_left;
+}
+void LevelMotor::init()
+{
+	pinMode(m_driver_left, OUTPUT);
+	pinMode(m_driver_right, OUTPUT);
+}
+void LevelMotor::set_power(int8_t power)
+{
+	m_power = constrain(power, -100, 100);
+	m_power = m_is_inverse ? m_power * -1 : m_power;
+	if (m_power < 0)
 	{
-		power = constrain(power, -100, 100);
-		if (power > 0 || (m_is_inverse == true && power < 0))
-		{
-			digitalWrite(m_driver_left, HIGH);
-			digitalWrite(m_driver_right, LOW);
-		}
-		else if (power < 0 || (m_is_inverse == false && power > 0))
-		{
-			digitalWrite(m_driver_left, LOW);
-			digitalWrite(m_driver_right, HIGH);
-		}
+		digitalWrite(m_driver_left, HIGH);
+		digitalWrite(m_driver_right, LOW);
 	}
-private:
-	uint8_t m_driver_left;
-	uint8_t m_driver_right;
-};
+	else
+	{
+		digitalWrite(m_driver_left, LOW);
+		digitalWrite(m_driver_right, HIGH);
+	}
+}
