@@ -6,7 +6,7 @@ class Motor {
 public:
 	Motor();
 	virtual void init() = 0;
-	virtual void set_power() = 0;
+	virtual void set_power(int8_t power) = 0;
 	void set_inverse(bool inverse);
 	bool get_inverse();
 	int8_t get_power();
