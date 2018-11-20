@@ -1,5 +1,11 @@
 #include "Motors.h"
 
+BrushMotor::BrushMotor(uint8_t pin_left, uint8_t pin_right)
+{
+	m_driver_left = pin_left;
+	m_driver_right = pin_right;
+}
+
 void BrushMotor::init()
 {
 	pinMode(m_driver_right, OUTPUT);
