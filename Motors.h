@@ -1,10 +1,11 @@
 #pragma once
 
 #include <Servo.h>
+#include <Arduino.h>
 
 class Motor {
 public:
-	Motor();
+	//Motor();
 	virtual void init() = 0;
 	virtual void set_power(int8_t power) = 0;
 	void set_inverse(bool inverse);
@@ -15,7 +16,7 @@ protected:
 	bool m_is_inverse;
 };
 
-class BrushlessMotor:Motor {
+class BrushlessMotor:public Motor {
 public:
 	BrushlessMotor(uint8_t pin);
 	void init();
@@ -25,7 +26,7 @@ private:
 	Servo m_driver;
 };
 
-class BrushMotor:Motor { //PWM CONTROL
+class BrushMotor:public Motor { //PWM CONTROL
 public:
 	BrushMotor(uint8_t pin_left, uint8_t pin_right);
 	void init();
@@ -35,7 +36,7 @@ private:
 	uint8_t m_driver_right;
 };
 
-class LevelMotor:Motor { //LEVEL CONTROL
+class LevelMotor:public Motor { //LEVEL CONTROL
 public:
 	LevelMotor(uint8_t pin_left, uint8_t pin_right);
 	void init();
