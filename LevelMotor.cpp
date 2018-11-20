@@ -14,7 +14,12 @@ void LevelMotor::set_power(int8_t power)
 {
 	m_power = constrain(power, -100, 100);
 	m_power = m_is_inverse ? m_power * -1 : m_power;
-	if (m_power < 0)
+	if (m_power == 0)
+	{
+		digitalWrite(m_driver_left, LOW);
+		digitalWrite(m_driver_right, LOW);
+	}
+	else if (m_power > 0)
 	{
 		digitalWrite(m_driver_left, HIGH);
 		digitalWrite(m_driver_right, LOW);
