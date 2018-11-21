@@ -1,4 +1,4 @@
-#include "Motors.h"
+#include "BrushlessMotor.h"
 
 BrushlessMotor::BrushlessMotor(uint8_t pin)
 {
