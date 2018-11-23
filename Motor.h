@@ -1,6 +1,5 @@
 #pragma once
 
-#include <Servo.h>
 #include <Arduino.h>
 
 class Motor {
