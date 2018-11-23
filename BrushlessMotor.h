@@ -1,5 +1,7 @@
 #pragma once
+
 #include "Motor.h"
+#include <Servo.h>
 
 class BrushlessMotor :public Motor {
 public:
