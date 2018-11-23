@@ -14,7 +14,7 @@ void BrushlessMotor::init()
 void BrushlessMotor::set_power(int8_t power)
 {
 	m_power = constrain(power, -100, 100);
-	if (m_is_inverse) m_power *= -1;
+	m_power = m_is_inverse ? m_power * -1 : m_power;
 	int pulse = map(m_power, -100, 100, 1000, 2000);
 	m_driver.writeMicroseconds(pulse);
 }
